@@ -8,116 +8,105 @@ GO-GLIDE is a robotics and computer vision project that aims to transform conven
 
 The proposed system uses hand gesture recognition for user interaction, autonomous following capabilities, and obstacle detection to assist travelers in navigating crowded environments such as airports, train stations, and campuses.
 
-## Proposed Features
+## Current gesture behavior
 
-| Feature             | Description                                         |
-| ------------------- | --------------------------------------------------- |
-| Gesture Recognition | Hand gesture detection for movement commands        |
-| Follow Mode         | Autonomous tracking of the user                     |
-| Obstacle Avoidance  | Detection and avoidance of nearby obstacles         |
-| Contactless Control | Interaction without physical handles or controls    |
-| Embedded Control    | Integration with microcontrollers and motor drivers |
+The camera pipeline currently recognizes two deliberately limited commands:
 
-## System Architecture
+- **Open palm → FOLLOW**
+- **Fist → STOP**
+
+A command must be observed in three consecutive frames before it is emitted. If the hand becomes missing or ambiguous for three consecutive frames while FOLLOW is active, the detector emits STOP. Exiting the camera loop also emits a final STOP when FOLLOW is active.
+
+Point-left and point-right gestures are not implemented yet and are ignored rather than guessed.
+
+**Hardware safety:** motor actions are still mocked in `CommandHandler`; this repository is not ready to drive a physical suitcase. The gesture thresholds and stop behavior must be validated with the intended camera, lighting, hand orientations, and hardware before any motor driver is connected.
+
+## Features
+
+| Feature | Description |
+| --- | --- |
+| Gesture recognition | Open-palm follow and fist stop commands with frame stabilization |
+| Follow mode | Command interface prepared for user-follow behavior |
+| Obstacle detection | Placeholder for ultrasonic or depth-sensor integration |
+| Contactless control | Gesture-based command input |
+| Embedded control | Motor-driver integration planned; current motor actions are mocked |
+
+## System architecture
 
 ```text
 Camera Input
      │
      ▼
-Hand Gesture Recognition
- (MediaPipe / OpenCV)
+MediaPipe Hand Landmarks
      │
      ▼
-Command Interpreter
+Open-Palm / Fist Classifier
      │
-     ├── Follow Mode
-     ├── Stop
-     └── Direction Commands
+     ▼
+Three-Frame Stabilizer
+     │
+     ├── FOLLOW
+     └── STOP (also on sustained hand loss)
              │
              ▼
- Motor Controller
-(Arduino / Raspberry Pi)
-             │
-             ▼
- Obstacle Detection Layer
-(Ultrasonic / Depth Sensors)
-             │
-             ▼
-      Suitcase Motion
+      Command Handler
+      (motor actions mocked)
 ```
 
-## Project Structure
+## Project structure
 
-```
+```text
 GO-GLIDE/
 ├── src/
-│   ├── vision/             # Camera input, gesture recognition
-│   ├── control/            # Motor control and command execution
-│   ├── navigation/         # Follow mode, obstacle avoidance
+│   ├── vision/             # Camera input and gesture classification
+│   ├── control/            # Command interpretation and motor actions
+│   ├── navigation/         # Obstacle detection and avoidance
 │   └── utils/              # Shared helpers and logging
-├── hardware/               # Arduino sketches and wiring diagrams
-├── tests/                  # Unit and integration tests
-├── docs/                   # Architecture notes and research
 ├── config/                 # Configuration files
+├── docs/                   # Architecture notes and research
+├── tests/                  # Unit tests
 ├── requirements.txt
 └── main.py
 ```
 
-## Getting Started
+## Getting started
 
-**Requires Python 3.9+**
+Requires Python 3.9+.
 
 ```bash
-git clone https://github.com/monika14r-m/GO-GLIDE.git
-cd GO-GLIDE
+git clone https://github.com/monika14r-m/GO-GLIDE-.git
+cd GO-GLIDE-
 pip install -r requirements.txt
 python main.py
 ```
 
-## Planned Technology Stack
+A camera accessible to OpenCV is required to run the live detector. Press `q` to exit the camera window.
 
-| Component            | Technologies                        |
-| -------------------- | ----------------------------------- |
-| Computer Vision      | OpenCV, MediaPipe                   |
-| Embedded Control     | Raspberry Pi, Arduino               |
-| Obstacle Detection   | Ultrasonic Sensors, Intel RealSense |
-| Motor Driver         | L298N                               |
-| Programming Language | Python                              |
+## Run tests
 
-## Development Roadmap
+Install the test runner and execute the unit suite:
 
-### Phase 1 — Computer Vision
-- [ ] Hand detection pipeline
-- [ ] Static gesture recognition
-- [ ] Real-time gesture classification
-- [ ] Command mapping
+```bash
+python -m pip install pytest
+python -m pytest -q
+```
 
-### Phase 2 — Embedded Systems
-- [ ] Motor controller integration
-- [ ] Raspberry Pi and Arduino communication
-- [ ] Basic movement control
+The gesture classifier tests use synthetic landmarks and do not require a camera or MediaPipe runtime.
 
-### Phase 3 — Autonomous Navigation
-- [ ] Follow-me mode
-- [ ] Obstacle detection and avoidance
-- [ ] Path correction
+## Planned work
 
-### Phase 4 — System Integration
-- [ ] Full prototype assembly
-- [ ] Field testing
-- [ ] Performance evaluation
+- Point-left and point-right gesture classification
+- Real motor-driver integration with hardware interlocks
+- Real ultrasonic/depth sensor input and obstacle-stop behavior
+- Follow-me tracking and field validation
 
-## Engineering Challenges
+## Engineering challenges
 
 - Real-time computer vision processing
 - Low-latency gesture recognition
 - Autonomous navigation in crowded environments
 - Sensor fusion for obstacle avoidance
 - Power-efficient embedded computing
-
-## Current Status
-
-🚧 **Research & Architecture Phase** — implementation starting now.
 
 ## Contributing
 

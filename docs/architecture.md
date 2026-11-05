@@ -1,24 +1,31 @@
 # GO-GLIDE Architecture Notes
 
-## System Components
+## System components
 
-- **Vision Layer** — OpenCV + MediaPipe for hand tracking and gesture classification
-- **Control Layer** — Command interpreter that maps gestures to motor actions
-- **Navigation Layer** — Obstacle detection and autonomous follow logic
-- **Hardware Layer** — Arduino / Raspberry Pi motor driver integration
+- **Vision layer** — OpenCV + MediaPipe for hand tracking and gesture classification.
+- **Control layer** — Command interpreter that maps stable gesture commands to motor actions.
+- **Navigation layer** — Obstacle detection and autonomous follow logic (currently placeholders).
+- **Hardware layer** — Arduino / Raspberry Pi motor-driver integration (not connected yet).
 
-## Gesture Command Mapping
+## Implemented gesture behavior
 
-| Gesture     | Command |
-|-------------|---------|
-| Open Hand   | FOLLOW  |
-| Fist        | STOP    |
-| Point Left  | LEFT    |
-| Point Right | RIGHT   |
+| Pose | Command | Status |
+| --- | --- | --- |
+| Open palm | FOLLOW | Implemented; requires three consecutive frames |
+| Fist | STOP | Implemented; requires three consecutive frames |
+| Point left | LEFT | Not implemented; ignored |
+| Point right | RIGHT | Not implemented; ignored |
 
-## Hardware Notes
+The classifier compares the wrist-to-fingertip distance with the corresponding wrist-to-PIP-joint distance for the four non-thumb fingers. Mixed or uncertain poses are ignored. The stabilizer requires three consecutive matching frames before changing commands. If no confident pose is available for three frames while FOLLOW is active, it emits STOP. Leaving the camera loop also emits a final STOP when FOLLOW is active.
 
-- Motor driver: L298N
-- Microcontroller: Arduino Uno / Raspberry Pi 4
-- Sensors: HC-SR04 ultrasonic (obstacle), Pi Camera / USB webcam (vision)
-- Communication: USB Serial (pyserial)
+## Hardware safety status
+
+`CommandHandler` still uses mock motor actions. The project must not be treated as ready for physical movement. Before connecting a motor driver, validate the classifier under the intended camera positions, lighting, hand orientations, and occlusion conditions, then add independent hardware emergency-stop and obstacle interlocks.
+
+## Hardware notes
+
+- Motor driver: L298N (planned)
+- Microcontroller: Arduino Uno / Raspberry Pi 4 (planned)
+- Sensors: HC-SR04 ultrasonic (planned)
+- Camera: Pi Camera / USB webcam
+- Communication: USB Serial (pyserial, planned)
