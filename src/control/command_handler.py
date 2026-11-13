@@ -21,16 +21,20 @@ class CommandHandler:
         logger.info("CommandHandler ready.")
 
     def execute(self, command: str):
-        """Execute a command received from the gesture detector."""
+        """Execute a supported command received from the gesture detector."""
+        if not isinstance(command, str) or command not in COMMAND_MAP:
+            logger.warning("[CMD] Ignoring unsupported command: %r", command)
+            return False
         if command == self.current_command:
-            return  # Avoid re-executing the same command repeatedly
+            return False  # Avoid re-executing the same command repeatedly
 
         self.current_command = command
-        message = COMMAND_MAP.get(command, f"Unknown command: {command}")
-        logger.info(f"[CMD] {command} → {message}")
+        message = COMMAND_MAP[command]
+        logger.info("[CMD] %s → %s", command, message)
 
         # TODO: replace with actual motor control calls
         self._mock_motor_action(command)
+        return True
 
     def _mock_motor_action(self, command: str):
         """Placeholder for motor driver integration."""
